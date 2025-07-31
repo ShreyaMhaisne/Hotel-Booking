@@ -3,7 +3,7 @@ import "dotenv/config";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import { clerkMiddleware } from '@clerk/express'
-import clerkwebhooks from "./controllers/clerkWebhooks.js";
+import clerkWebhooks from "./controllers/clerkWebhooks.js";
 
 connectDB()
 const app = express()
@@ -15,12 +15,9 @@ app.use(express.json())
 app.use(clerkMiddleware())
 
 // Api to listen to clerk webhook
-app.use("/api/clerk",clerkwebhooks);
+app.use("/api/clerk",clerkWebhooks);
 
-
-
-
-app.get('/',(req,res)=>res.send("API is working fine"))
+app.get('/',(req,res)=>res.send("API is working"))
 
 const PORT = process.env.PORT || 3000;
 
