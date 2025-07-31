@@ -25,3 +25,4 @@ Thumbs.db
 
 # === Build Output ===
 *.cache/
+server/.env
