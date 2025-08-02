@@ -4,9 +4,9 @@ import { Webhook } from "svix";
 
 const clerkWebhooks = async (req, res) => {
     try {
-        console.log("🔔 Webhook received");
+         console.log("Received Clerk Webhook:", req.body);
         // crete svix  instacnce with clerk webhook secret.
-        const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET)
+        const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
         //getting headers
         const headers = {
@@ -38,7 +38,7 @@ const clerkWebhooks = async (req, res) => {
                 await User.create(userData);
                 console.log("✅ User created in MongoDB");
                
-            }catch{
+            }catch (error   ){
                 console.log("❌ Error saving user to MongoDB:", error.message);
             }
              break;
