@@ -1,0 +1,29 @@
+# === Node ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# === Vite ===
+dist/
+.vite/
+
+# === Env Files ===
+.env
+.env.local
+.env.*.local
+
+# === OS and IDEs ===
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# === Log files ===
+*.log
+
+# === Build Output ===
+*.cache/
+server/.env
+.vercel
