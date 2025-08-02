@@ -9,13 +9,15 @@ connectDB()
 const app = express()
 app.use(cors())
 
+
+//MiddleWare
+app.use(express.json())
+app.use(clerkMiddleware())
+
 // Api to listen to clerk webhook
-app.post("/api/clerk", express.raw({ type: "application/json" }), clerkWebhooks);
+app.use("/api/clerk", clerkWebhooks);
 
-app.use(express.json());
-app.use(clerkMiddleware());
-
-app.get("/",(req,res)=>res.send("API is working"));
+app.get('/',(req,res)=>res.send("API is working"));
 
 const PORT = process.env.PORT || 3000;
 
