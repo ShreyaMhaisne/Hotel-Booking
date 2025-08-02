@@ -4,6 +4,7 @@ import { Webhook } from "svix";
 
 const clerkWebhooks = async (req, res) => {
     try {
+        console.log("🔔 Webhook received");
         // crete svix  instacnce with clerk webhook secret.
         const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET)
 
@@ -14,22 +15,27 @@ const clerkWebhooks = async (req, res) => {
             "svix-signature": req.headers["svix-signature"],
         };
         // verifying headers
-        await whook.verify(JSON.stringify(req.body), headers);
+        const payload = whook.verify(JSON.stringify(req.body), headers);
 
         // getting data from request body
         const { data, type } = req.body
 
-        const userData = new mongoose.Schema({
+        console.log("📦 Webhook type:", type);
+        console.log("👤 Incoming data:", data);
+
+        const userData = {
             _id: data.id,
-            email: data.email_addresses[0].email_address,
-            username: data.first_name + " " + data.last_name,
+            email: data.email_addresses?.[0]?.email_address || "",
+            username: `${data.first_name || " "} ${data.last_name || ""}`,
             image: data.image_url,
-        }, { _id: false });
+            recentSearchedCities: [],
+        };
 
         // switch cases for different events
         switch (type) {
             case "user.created": {
                 await User.create(userData);
+                console.log("✅ User created in MongoDB");
                 break;
             }
 
@@ -41,18 +47,19 @@ const clerkWebhooks = async (req, res) => {
 
             }
             case "user.deleted": {
-                    await User.findByIdAndDelete(data.id);
-                    console.log("user deleted");
-                     break;
-                }
+                await User.findByIdAndDelete(data.id);
+                console.log("user deleted");
+                break;
+            }
 
             default:
+                console.log("⚠️ Unhandled event type");
                 break;
         }
-         res.json({ success: true, message: "Webhook Recieved" })
+        res.json({ success: true, message: "Webhook Recieved" })
     } catch (error) {
         console.log(error.message);
-         res.status(200).json({ success: false, message: error.message });
+        res.status(200).json({ success: false, message: error.message });
     }
 
 }
