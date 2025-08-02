@@ -6,6 +6,6 @@ export default async function handler(req, res) {
     await connectDB(); // Connect to MongoDB
     await clerkWebhooks(req, res); // Handle Clerk webhook
   } else {
-    res.status(405).json({ message: "Method Not Allowed" });
+    res.status(405).json({  success: false, message: "Method Not Allowed" });
   }
 }
