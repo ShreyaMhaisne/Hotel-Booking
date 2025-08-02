@@ -1,68 +1,72 @@
-import express from "express";
 import mongoose from "mongoose";
+import express from "express";
 import User from "../models/User.js";
 import { Webhook } from "svix";
 
-const router = express.Router();
 
-router.post("/", async (req, res) => {
-  try {
-    console.log("🔔 Webhook received");
+const clerkWebhooks = async (req, res) => {
+    try {
+        console.log("🔔 Webhook received");
+        // crete svix  instacnce with clerk webhook secret.
+        const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET)
 
-    const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
+        //getting headers
+        const headers = {
+            "svix-id": req.headers["svix-id"],
+            "svix-timestamp": req.headers["svix-timestamp"],
+            "svix-signature": req.headers["svix-signature"],
+        };
+        // verifying headers
+        const payload = whook.verify(JSON.stringify(req.body), headers);
 
-    const headers = {
-      "svix-id": req.headers["svix-id"],
-      "svix-timestamp": req.headers["svix-timestamp"],
-      "svix-signature": req.headers["svix-signature"],
-    };
+        // getting data from request body
+        const { data, type } = req.body
 
-    const payload = whook.verify(JSON.stringify(req.body), headers);
+        console.log("📦 Webhook type:", type);
+        console.log("👤 Incoming data:", data);
 
-    const { data, type } = req.body;
+        const userData = {
+            _id: data.id,
+            email: data.email_addresses?.[0]?.email_address || "",
+            username: `${data.first_name || " "} ${data.last_name || ""}`,
+            image: data.image_url,
+            recentSearchedCities: [],
+        };
 
-    console.log("📦 Webhook type:", type);
-    console.log("👤 Incoming data:", data);
+        // switch cases for different events
+        switch (type) {
+            case "user.created":try {
+                console.log("🚀 userData to save:", userData);
+                await User.create(userData);
+                console.log("✅ User created in MongoDB");
+               
+            }catch{
+                console.log("❌ Error saving user to MongoDB:", error.message);
+            }
+             break;
 
-    const userData = {
-      _id: data.id,
-      email: data.email_addresses?.[0]?.email_address || "",
-      username: `${data.first_name || ""} ${data.last_name || ""}`,
-      image: data.image_url,
-      recentSearchedCities: [],
-    };
+            case "user.updated": {
 
-    switch (type) {
-      case "user.created":
-        try {
-          console.log("🚀 userData to save:", userData);
-          await User.create(userData);
-          console.log("✅ User created in MongoDB");
-        } catch (error) {
-          console.log("❌ Error saving user to MongoDB:", error.message);
+                await User.findByIdAndUpdate(data.id, userData);
+                console.log("user updated");
+                break;
+
+            }
+            case "user.deleted": {
+                await User.findByIdAndDelete(data.id);
+                console.log("user deleted");
+                break;
+            }
+
+            default:
+                console.log("⚠️ Unhandled event type");
+                break;
         }
-        break;
-
-      case "user.updated":
-        await User.findByIdAndUpdate(data.id, userData);
-        console.log("✅ User updated");
-        break;
-
-      case "user.deleted":
-        await User.findByIdAndDelete(data.id);
-        console.log("🗑️ User deleted");
-        break;
-
-      default:
-        console.log("⚠️ Unhandled event type:", type);
-        break;
+        res.json({ success: true, message: "Webhook Recieved" })
+    } catch (error) {
+        console.log(error.message);
+        res.status(200).json({ success: false, message: error.message });
     }
 
-    res.json({ success: true, message: "Webhook received" });
-  } catch (error) {
-    console.log("❌ Webhook error:", error.message);
-    res.status(200).json({ success: false, message: error.message });
-  }
-});
-
-export default router;
+}
+export default clerkWebhooks;
