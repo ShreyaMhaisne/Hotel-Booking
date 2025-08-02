@@ -2,14 +2,14 @@
     "version": 2,
     "builds": [
         {
-            "src": "api/clerk.js",
+            "src": "server.js",
             "use": "@vercel/node"
         }
     ],
     "routes": [
         {
-            "src": "/api/clerk",
-            "dest": "api/clerk.js"
+            "src": "/(.*)",
+            "dest": "server.js"
         }
     ]
 }
