@@ -33,11 +33,15 @@ const clerkWebhooks = async (req, res) => {
 
         // switch cases for different events
         switch (type) {
-            case "user.created": {
+            case "user.created":try {
+                console.log("🚀 userData to save:", userData);
                 await User.create(userData);
                 console.log("✅ User created in MongoDB");
-                break;
+               
+            }catch{
+                console.log("❌ Error saving user to MongoDB:", error.message);
             }
+             break;
 
             case "user.updated": {
 
