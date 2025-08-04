@@ -3,10 +3,10 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
     _id: {type: String , required: true},
     username: {type: String , required: true},
-    email: {type: String , required: true},
+    email: {type: String , required: false},
     image: {type: String , required: true},
     role: {type: String , enum: ["user", "hotelOwner"],default: "user"},
-    recentSearchedCities: {type: String,  default: []},
+    recentSearchedCities: {type: Array,  default: []},
 }, { timestamps: true });
 
 const User = mongoose.model("User",userSchema); 

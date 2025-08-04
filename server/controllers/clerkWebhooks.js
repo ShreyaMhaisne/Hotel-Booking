@@ -36,10 +36,10 @@ const clerkWebhooks = async (req, res) => {
             case "user.created":try {
                 console.log("🚀 userData to save:", userData);
                 await User.create(userData);
-                console.log("✅ User created in MongoDB");
+                console.log(" User created in MongoDB");
                
             }catch (error   ){
-                console.log("❌ Error saving user to MongoDB:", error.message);
+                console.log(" Error saving user to MongoDB:", error.message);
             }
              break;
 
